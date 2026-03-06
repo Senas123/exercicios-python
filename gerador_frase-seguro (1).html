@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inspirador IA - Padrão MVC</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 50px; background: #f0f2f5; }
+        .box { background: white; padding: 30px; border-radius: 15px; display: inline-block; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 350px; }
+        h2 { color: #333; margin-bottom: 20px; }
+        input { padding: 12px; border: 2px solid #ddd; border-radius: 8px; width: 80%; margin-bottom: 15px; outline: none; transition: border 0.3s; }
+        input:focus { border-color: #007bff; }
+        button { padding: 12px 24px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; width: 88%; transition: background 0.3s; }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        #resultado { margin-top: 25px; font-style: italic; color: #555; white-space: pre-line; line-height: 1.6; min-height: 50px; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Inspiração IA</h2>
+    <input type="text" id="palavraInput" placeholder="Ex: Liberdade, Café, Futuro">
+    <button id="btnEnviar">Gerar Frase</button>
+    
+    <div id="resultado"></div>
+</div>
+
+<script>
+    const btn = document.getElementById('btnEnviar');
+    const display = document.getElementById('resultado');
+    const input = document.getElementById('palavraInput');
+
+    btn.addEventListener('click', async () => {
+        const palavra = input.value.trim();
+        
+        if(!palavra) {
+            alert("Por favor, digite uma palavra antes de enviar!");
+            return;
+        }
+
+        // Feedback visual para o usuário
+        btn.disabled = true;
+        display.textContent = "O Controller está processando seu pedido...";
+
+        try {
+            // Chamada para a rota definida no server.js
+            const response = await fetch('/api/inspiracao', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ palavra: palavra })
+            });
+
+            const data = await response.json();
+
+            if (data.frase) {
+                display.textContent = data.frase;
+            } else {
+                display.textContent = "Ops! Ocorreu um erro: " + (data.erro || "Falha na resposta.");
+            }
+
+        } catch (error) {
+            console.error("Erro no Fetch:", error);
+            display.textContent = "Erro crítico: Não foi possível conectar ao servidor.";
+        } finally {
+            // Reabilita o botão após a resposta (sucesso ou erro)
+            btn.disabled = false;
+        }
+    });
+</script>
+
+</body>
+</html>
